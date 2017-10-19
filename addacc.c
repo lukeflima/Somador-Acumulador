@@ -13,8 +13,8 @@ struct resposta{
 	int s, cout;
 };
 
-struct resposta S (int a, int b){
-	int soma = a+b;
+struct resposta S (int a, int b, int c){
+	int soma = a+b+c;
 	struct resposta res;
 	res.s = soma & 0xF;
 	if(soma > 0xF) res.cout = 1;
@@ -69,8 +69,14 @@ int main(){
 	//for (int acc = 0 ; acc < 16; acc++ )
 	for (a = 0   ; a <16   ; a++   )
 	for (clk = 0 ; clk <= 1; clk++ ) {
+			if(clk == 1){
+			if(code == 0) LABEL("copyA");
+			if(code == 1) LABEL("sumA");
+			if(code == 2) LABEL("copynotA");
+			if(code == 3) LABEL("subA");
+		}
 		mux0 = mux(a, inv(a), (code >> 0) & 0x1);
-		res = S(acc1, mux0); 
+		res = S(acc1, mux0, (code >> 0) & 0x1); 
 		mux1 = mux(mux0, res.s, (code >> 1) & 0x1);
 		acc1 = reg(mux1,clk,clka);
 
