@@ -32,14 +32,14 @@ int inv (int a){
 	return a^15;
 }
 
-int reg(int b ,int c)
+int reg(int b ,int c, int ca)
 {
 	static int a =0;
-	if (c==0) return a;
-	if (c==1){
+	if (c==1 && ca == 0){
 		a = b;
 		return b;
 	}
+	return a;
 }
 
 
@@ -62,17 +62,17 @@ int main(){
 	LABEL ("addacc");
 	AFFECT ("0","vdd","0b1");
 	AFFECT ("0","vss","0b0");
-
- 	int mux0, mux1, acc1;
+	
+ 	int mux0, mux1, acc1 = 0,clka = 0, clk,a,code;
 	struct resposta res;	
- 	for (int code = 0; code < 4; code++)
+ 	for (code = 0; code < 4; code++)
 	//for (int acc = 0 ; acc < 16; acc++ )
-	for (int a = 0   ; a <16   ; a++   )
-	for (int clk = 0 ; clk <= 1; clk++ ) {
+	for (a = 0   ; a <16   ; a++   )
+	for (clk = 0 ; clk <= 1; clk++ ) {
 		mux0 = mux(a, inv(a), (code >> 0) & 0x1);
 		res = S(acc1, mux0); 
 		mux1 = mux(mux0, res.s, (code >> 1) & 0x1);
-		acc1 = reg(mux1,clk);
+		acc1 = reg(mux1,clk,clka);
 
 		AFFECT(inttostr(cur_vect), "clk", inttostr(clk));
 		AFFECT(inttostr(cur_vect), "sel0", inttostr((code >> 0) & 0x1));
@@ -82,6 +82,7 @@ int main(){
 		AFFECT(inttostr(cur_vect), "A", inttostr(a));
 		AFFECT(inttostr(cur_vect), "acc", inttostr(acc1));
 		++cur_vect;
+		clka = clk;
 	}
 
 	SAV_GENPAT();
