@@ -29,7 +29,7 @@ int mux(int a ,int b,int c){
 }
 
 int inv (int a){
-	return a^15;
+	return a^0xF;
 }
 
 int reg(int b ,int c, int ca)
@@ -54,7 +54,7 @@ int main(){
 
 	DECLAR("s", ":2", "B", OUT, "3 down to 0","");
 	DECLAR("cout", ":2", "B", OUT, "","");	
-	DECLAR("acc", ":2", "B", OUT, "3 down to 0","");
+	//DECLAR("acc", ":2", "B", INOUT, "3 down to 0","");
 
 	DECLAR("vdd", ":2", "B", IN, "","");
 	DECLAR("vss", ":2", "B", IN, "","");
@@ -62,23 +62,22 @@ int main(){
 	LABEL ("addacc");
 	AFFECT ("0","vdd","0b1");
 	AFFECT ("0","vss","0b0");
-	
+
+
  	int mux0, mux1, acc1 = 0,clka = 0, clk,a,code;
 	struct resposta res;	
- 	for (code = 0; code < 4; code++)
-	//for (int acc = 0 ; acc < 16; acc++ )
+ 	for (code = 0; code < 4; code++){
+		if(code == 0) LABEL("copyA");
+		if(code == 1) LABEL("invA");
+		if(code == 2) LABEL("sumA");
+		if(code == 3) LABEL("subA");
 	for (a = 0   ; a <16   ; a++   )
 	for (clk = 0 ; clk <= 1; clk++ ) {
-			if(clk == 1){
-			if(code == 0) LABEL("copyA");
-			if(code == 1) LABEL("sumA");
-			if(code == 2) LABEL("copynotA");
-			if(code == 3) LABEL("subA");
-		}
 		mux0 = mux(a, inv(a), (code >> 0) & 0x1);
+		acc1 = reg(mux1,clk,clka);
 		res = S(acc1, mux0, (code >> 0) & 0x1); 
 		mux1 = mux(mux0, res.s, (code >> 1) & 0x1);
-		acc1 = reg(mux1,clk,clka);
+
 
 		AFFECT(inttostr(cur_vect), "clk", inttostr(clk));
 		AFFECT(inttostr(cur_vect), "sel0", inttostr((code >> 0) & 0x1));
@@ -86,11 +85,11 @@ int main(){
 		AFFECT(inttostr(cur_vect), "cout", inttostr(res.cout));
 		AFFECT(inttostr(cur_vect), "S", inttostr(mux1));
 		AFFECT(inttostr(cur_vect), "A", inttostr(a));
-		AFFECT(inttostr(cur_vect), "acc", inttostr(acc1));
+		//AFFECT(inttostr(cur_vect), "acc", inttostr(acc1));
 		++cur_vect;
 		clka = clk;
 	}
-
+	}
 	SAV_GENPAT();
 	return 0;
 }
